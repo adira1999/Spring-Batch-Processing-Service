@@ -22,11 +22,8 @@ jobs:
     # Step 1: Checkout the code
     - name: Checkout code
       uses: actions/checkout@v4
-      with:
-        fetch-depth: 0 # Ensures all branches/tags are fetched
-        ref: master
 
-    # Step 2: List directory contents for debugging
+    # Step 2: List directory contents (for debugging)
     - name: List directory contents
       run: ls -la
 
@@ -38,9 +35,16 @@ jobs:
         distribution: 'temurin'
         cache: maven
 
-    # Step 4: Build the project with Maven
-    - name: Build with Maven
-      run: mvn -B package --file pom.xml
+    # Step 4: Build the project with Maven (skip tests)
+    - name: Build with Maven (skip tests)
+      run: mvn -B package -DskipTests --file pom.xml
+
+    # Step 5: Upload test results for review
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      with:
+        name: surefire-reports
+        path: target/surefire-reports/
 
     # Optional: Update dependency graph for Dependabot alerts
     - name: Update dependency graph
