@@ -1,0 +1,66 @@
+# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Java CI with Maven
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+      
+    steps:
+    # Step 1: Checkout the code
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # Step 2: List directory contents (conditional on OS)
+    - name: List directory contents (Linux/Mac)
+      if: runner.os != 'Windows'
+      run: ls -la
+
+    - name: List directory contents (Windows)
+      if: runner.os == 'Windows'
+      run: Get-ChildItem -Force
+
+    # Step 3: Set up JDK 17
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+        cache: maven
+
+    # Step 4: Build the project with Maven (skip tests)
+    - name: Build with Maven (skip tests, force snapshot update)
+      run: mvn -B clean install -DskipTests -U --file pom.xml
+
+    # Step 5: Upload test results for review
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      with:
+        name: surefire-reports
+        path: target/surefire-reports/
+
+  # Publish job that depends on build
+  publish:
+    needs: build  # Ensures that the publish job runs only after the build job succeeds
+    runs-on: ubuntu-latest
+    steps:
+    - name: Publish artifacts
+      run: mvn -B deploy --file pom.xml
+
+
+   
