@@ -14,11 +14,13 @@ on:
   pull_request:
     branches: [ "master" ]
 
- 
-
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{matrix.os}}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest] 
+      
 
     steps:
     # Step 1: Checkout the code
@@ -40,13 +42,21 @@ jobs:
     # Step 4: Build the project with Maven (skip tests)
     - name: Build with Maven (skip tests, force snapshot update)
       run: mvn -B clean install -DskipTests -U --file pom.xml
-      
+
     # Step 5: Upload test results for review
     - name: Upload test results
       uses: actions/upload-artifact@v3
       with:
         name: surefire-reports
         path: target/surefire-reports/
+
+  # Publish job that depends on build
+  publish:
+    needs: build  # Ensures that the publish job runs only after the build job succeeds
+    runs-on: ubuntu-latest  # Specify the environment to run the publish job
+
+    
+     
 
    
 
