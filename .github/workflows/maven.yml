@@ -60,7 +60,7 @@ jobs:
   # Publish job that depends on build
   publish:
     needs: build  # Ensures that the publish job runs only after the build job succeeds
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     steps:
     - name: Publish artifacts
       run: mvn -B deploy --file pom.xml
