@@ -43,20 +43,19 @@ jobs:
         distribution: 'temurin'
         cache: maven
 
-    # Step 4: Set the correct working directory (if needed)
-    - name: Set working directory
-      run: cd /home/runner/work/Spring-Batch-Processing-Service/Spring-Batch-Processing-Service
+    # Step 4: Build the project with Maven (skip tests)
+    # Specify the correct directory where your `pom.xml` is located
+    - name: Build with Maven (skip tests)
+      run: mvn -B clean install -DskipTests
+      working-directory: ./Spring-Batch-Processing-Service
 
-    # Step 5: Build the project with Maven (skip tests)
-    - name: Build with Maven (skip tests, force snapshot update)
-      run: mvn -B clean install -DskipTests -U --file pom.xml
-
-    # Step 6: Upload test results for review
+    # Step 5: Upload test results for review
     - name: Upload test results
       uses: actions/upload-artifact@v3
       with:
         name: surefire-reports
         path: target/surefire-reports/
+      working-directory: ./Spring-Batch-Processing-Service
 
   # Publish job that depends on build
   publish:
@@ -65,4 +64,6 @@ jobs:
     steps:
     - name: Publish artifacts
       run: mvn -B deploy --file pom.xml
+      working-directory: ./Spring-Batch-Processing-Service
+
 
